@@ -1,12 +1,16 @@
 import express from 'express'
 import mongoose from 'mongoose'
+import morgan from 'morgan'
+import cookieParser from 'cookie-parser'
 import dotenv from 'dotenv'
 import colors from 'colors'
+import expressValidator from 'express-validator'
 
 //import routes
 import userRoutes from './routes/userRoutes.js'
 import productRoutes from './routes/productRoutes.js'
 import orderRoutes from './routes/orderRoutes.js'
+import { errorHandler } from './middlewares/errorMiddleware.js'
 
 //config the dotenv
 dotenv.config()
@@ -36,6 +40,17 @@ const connectDB = async () => {
 
 connectDB()
 
+//middlewares
+app.use(morgan('dev'))
+app.use(express.json())
+app.use(
+  express.urlencoded({
+    extended: true,
+  })
+)
+app.use(cookieParser())
+app.use(expressValidator())
+
 //make sure the server API is running
 app.get('/', (req, res) => {
   res.send('API is running...')
@@ -45,6 +60,9 @@ app.get('/', (req, res) => {
 app.use('/api/users', userRoutes)
 app.use('/api/products', productRoutes)
 app.use('/api/orders', orderRoutes)
+
+//custom middlewares
+app.use(errorHandler)
 
 //getting the port number
 const port = process.env.PORT || 5000
