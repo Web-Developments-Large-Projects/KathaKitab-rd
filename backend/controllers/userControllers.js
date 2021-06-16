@@ -1,19 +1,13 @@
 import asyncHandler from 'express-async-handler'
-import jwt from 'jsonwebtoken' //to generate signed token
-import expressJwt from 'express-jwt' //for authorization check
 import User from '../models/userModel.js'
+import { generateToken } from '../utils/generateToken.js'
 
 //@desc     Register a new user
 //@route    POST /api/users
 //@access   Public
-export const registerUser = asyncHandler(async (req, res) => {
+export const userRegister = asyncHandler(async (req, res) => {
   // console.log(req.body)
-  const { name, email, password, about, role } = req.body
-
-  // let userRole
-  // userRole = role ? role : 0
-  // console.log(userRole)
-  // if (userRole) console.log('admin')
+  const { name, email, password, about } = req.body
 
   const userExists = await User.findOne({ email })
 
@@ -32,6 +26,7 @@ export const registerUser = asyncHandler(async (req, res) => {
       history: user.history,
       about: user.about,
       role: user.role,
+      token: generateToken(user._id),
     })
   } else {
     res.status(400)
@@ -50,13 +45,6 @@ export const userLogin = asyncHandler(async (req, res) => {
 
   //authenticate the user
   if (user && (await user.matchPassword(password))) {
-    const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: '1d',
-    })
-
-    //set the cookie expiration for 1 day
-    res.cookie('t', token, { expire: new Date() + 86400 })
-
     //return response token with user to frontend client
     res.status(200).json({
       _id: user._id,
@@ -65,10 +53,10 @@ export const userLogin = asyncHandler(async (req, res) => {
       role: user.role,
       history: user.history,
       about: user.about,
-      token: token,
+      token: generateToken(user._id),
     })
   } else {
-    res.status(404)
+    res.status(401)
     throw new Error('Invalid email or password')
   }
 })
@@ -76,7 +64,48 @@ export const userLogin = asyncHandler(async (req, res) => {
 //@desc     Log out a user
 //@route    GET /api/users/logout
 //@access   Public
-export const userLogout = asyncHandler(async (req, res) => {
-  res.clearCookie('t')
-  res.json({ message: 'Logout success' })
+// export const userLogout = asyncHandler(async (req, res) => {
+//   res.clearCookie('t')
+//   res.json({ message: 'Logout success' })
+// })
+
+//@desc     Get a user profile
+//@route    GET /api/users/profile
+//@access   Public
+export const getUserProfile = asyncHandler(async (req, res) => {})
+
+//@desc     Get all user
+//@route    GET /api/users/
+//@access   Private / Admin
+export const getAllUsers = asyncHandler(async (req, res) => {
+  const users = await User.find({})
+    .select('-hashed_password')
+    .select('-salt')
+    .select('-updatedAt')
+    .select('-__v')
+
+  if (users) {
+    res.json(users)
+  } else {
+    res.status(404)
+    throw new Error('Users not found')
+  }
+})
+
+//@desc     Get a user by id
+//@route    GET /api/users/:id
+//@access   Private / Admin
+export const getUserById = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.params.id)
+    .select('-hashed_password')
+    .select('-salt')
+    .select('-updatedAt')
+    .select('-__v')
+
+  if (user) {
+    res.json(user)
+  } else {
+    res.status(404)
+    throw new Error('User not found')
+  }
 })

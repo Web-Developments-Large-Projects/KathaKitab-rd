@@ -1,15 +1,20 @@
 import express from 'express'
 import {
-  registerUser,
+  getAllUsers,
+  getUserById,
   userLogin,
-  userLogout,
+  userRegister,
 } from '../controllers/userControllers.js'
 import { userSignupValidator } from '../middlewares/userValidatorMiddleware.js'
+import { isAuth, isAdmin } from '../middlewares/authMiddlewares.js'
 
 const router = express.Router()
 
-router.route('/').post(userSignupValidator, registerUser)
+router
+  .route('/')
+  .post(userSignupValidator, userRegister)
+  .get(isAuth, isAdmin, getAllUsers)
 router.route('/login').post(userLogin)
-router.route('/logout').get(userLogout)
+router.route('/:id').get(isAuth, isAdmin, getUserById)
 
 export default router

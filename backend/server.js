@@ -1,6 +1,6 @@
 import express from 'express'
-import mongoose from 'mongoose'
 import morgan from 'morgan'
+import bodycookieParser from 'body-parser'
 import cookieParser from 'cookie-parser'
 import dotenv from 'dotenv'
 import colors from 'colors'
@@ -10,7 +10,8 @@ import expressValidator from 'express-validator'
 import userRoutes from './routes/userRoutes.js'
 import productRoutes from './routes/productRoutes.js'
 import orderRoutes from './routes/orderRoutes.js'
-import { errorHandler } from './middlewares/errorMiddleware.js'
+import { notFound, errorHandler } from './middlewares/errorMiddleware.js'
+import { connectDB } from './utils/dbConfig.js'
 
 //config the dotenv
 dotenv.config()
@@ -19,25 +20,6 @@ dotenv.config()
 const app = express()
 
 //database connection
-const connectDB = async () => {
-  try {
-    const conn = await mongoose.connect(process.env.MONGODB_URI, {
-      useNewUrlParser: true,
-      useCreateIndex: true,
-      useUnifiedTopology: true,
-    })
-    console.log(
-      `MongoDB connected:  ${conn.connection.host} && ${process.env.MONGODB_URI}...`
-        .cyan.underline
-    )
-  } catch (error) {
-    console.error(
-      `MongoDB connection error: ${error.message}`.red.underline.bold
-    )
-    process.exit(1)
-  }
-}
-
 connectDB()
 
 //middlewares
@@ -62,6 +44,7 @@ app.use('/api/products', productRoutes)
 app.use('/api/orders', orderRoutes)
 
 //custom middlewares
+app.use(notFound)
 app.use(errorHandler)
 
 //getting the port number
