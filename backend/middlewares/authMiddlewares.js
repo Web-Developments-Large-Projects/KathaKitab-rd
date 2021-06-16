@@ -22,7 +22,7 @@ export const isAuth = asyncHandler(async (req, res, next) => {
       throw new Error('Not Authorized, token failed')
     }
   } else {
-    res.status(401)
+    res.status(403)
     throw new Error('Not Authorized, no token found')
   }
 })
