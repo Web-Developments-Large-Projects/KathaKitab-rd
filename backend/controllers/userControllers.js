@@ -69,11 +69,6 @@ export const userLogin = asyncHandler(async (req, res) => {
 //   res.json({ message: 'Logout success' })
 // })
 
-//@desc     Get a user profile
-//@route    GET /api/users/profile
-//@access   Public
-export const getUserProfile = asyncHandler(async (req, res) => {})
-
 //@desc     Get all user
 //@route    GET /api/users/
 //@access   Private / Admin
@@ -104,6 +99,63 @@ export const getUserById = asyncHandler(async (req, res) => {
 
   if (user) {
     res.json(user)
+  } else {
+    res.status(404)
+    throw new Error('User not found')
+  }
+})
+
+//@desc     Get a user profile
+//@route    GET /api/users/:id/profile
+//@access   Private
+export const getUserProfile = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.params.id)
+
+  if (user) {
+    res.json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      about: user.about,
+      history: user.history,
+      createdAt: user.createdAt,
+    })
+  } else {
+    res.status(404)
+    throw new Error('User not found')
+  }
+})
+
+//@desc     Update user profile
+//@route    PUT /api/users/:id
+//@access   Private
+export const updateUserProfile = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.params.id)
+
+  if (user) {
+    user.name = req.body.name || user.name
+    user.email = req.body.email || user.email
+    user.about = req.body.about || user.about
+    if (req.body.password) {
+      user.password = req.body.password
+    }
+
+    const updatedUser = await user.save()
+
+    if (updatedUser) {
+      res.json({
+        _id: updatedUser._id,
+        name: updatedUser.name,
+        email: updatedUser.email,
+        about: updatedUser.about,
+        role: updatedUser.role,
+        history: updatedUser.history,
+        createdAt: updatedUser.createdAt,
+      })
+    } else {
+      res.status(400)
+      throw new Error('User not updated')
+    }
   } else {
     res.status(404)
     throw new Error('User not found')

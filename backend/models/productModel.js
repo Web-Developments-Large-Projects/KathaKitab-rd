@@ -31,6 +31,11 @@ const productSchema = new mongoose.Schema(
       trim: true,
       default: 0,
     },
+
+    sold: {
+      type: Number,
+      default: 0,
+    },
     image: {
       data: Buffer,
       contentType: String,

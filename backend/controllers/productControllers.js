@@ -129,10 +129,11 @@ export const getProductById = asyncHandler(async (req, res) => {
 //@route    GET /api/products/:id/image
 //@access   Public
 export const getProductImageById = asyncHandler(async (req, res) => {
-  const { image: productImage } = await Product.findById(req.params.id)
+  const product = await Product.findById(req.params.id)
 
-  if (productImage) {
-    res.json(productImage)
+  if (product.image.data) {
+    res.set('Content-Type', product.image.contentType)
+    res.send(product.image.data)
   } else {
     res.status(404)
     throw new Error('Iroduct image not found')
@@ -211,5 +212,119 @@ export const deleteProductById = asyncHandler(async (req, res) => {
   } else {
     res.status(404)
     throw new Error('Product not deleted or not found')
+  }
+})
+
+// products based on sell and arrival
+
+// by sell = /products?sortBy=sold&order=desc&limit=4
+// by arrival = /products?sortBy=createdAt&order=asc&limit=5
+// if no params are sent, all products are returned
+
+//@desc     Get products with queries
+//@route    GET /api/products?sortBy=sold&order=desc&limit=4
+//@access   Public
+export const getProductsBySell = asyncHandler(async (req, res) => {
+  let order = req.query.order ? req.query.order : 'asc'
+  let sortBy = req.query.sortBy ? req.query.sortBy : '_id'
+  let limit = req.query.limit ? parseInt(req.query.limit) : 10
+
+  const products = await Product.find({})
+    .select('-image')
+    .populate('category')
+    .sort([[sortBy, order]])
+    .limit(limit)
+
+  if (products) {
+    res.json(products)
+  } else {
+    res.status(404)
+    throw new Error('Products not found')
+  }
+})
+
+// products based on related products
+// products with same category
+
+// by related = /products?sortBy=sold&order=desc&limit=4
+// by arrival = /products?sortBy=createdAt&order=asc&limit=5
+// if no params are sent, all products are returned
+
+//@desc     Get related products by id
+//@route    GET /api/products/:id?limit=4
+//@access   Public
+export const getRelatedProductsById = asyncHandler(async (req, res) => {
+  let limit = req.query.limit ? parseInt(req.query.limit) : 10
+
+  const selectedProduct = await Product.findById(req.params.id)
+
+  const products = await Product.find({
+    _id: { $ne: selectedProduct },
+    category: selectedProduct.category,
+  })
+    .limit(limit)
+    .populate('category', '_id name')
+    .select('-image')
+
+  if (products) {
+    res.json(products)
+  } else {
+    res.status(404)
+    throw new Error('Products not found')
+  }
+})
+
+//@desc     Get related products category
+//@route    GET /api/products/categories
+//@access   Public
+export const getProductsCategories = asyncHandler(async (req, res) => {
+  const categories = await Product.distinct('category', {})
+
+  if (categories) {
+    res.json(categories)
+  } else {
+    res.status(404)
+    throw new Error('Categories not found')
+  }
+})
+
+//@desc     Get products by search
+//@route    POST /api/products/search
+//@access   Public
+export const getProductsbySearch = asyncHandler(async (req, res) => {
+  let order = req.query.order ? req.query.order : 'asc'
+  let sortBy = req.query.sortBy ? req.query.sortBy : '_id'
+  let limit = req.query.limit ? parseInt(req.query.limit) : 10
+  let skip = parseInt(req.body.skip)
+  let findArgs = {}
+
+  for (let key in req.body.filters) {
+    if (req.body.filters[key].length > 0) {
+      if (key === 'price') {
+        // gte = greater than pracie (0-10)
+        // lte = less than
+
+        findArgs[key] = {
+          $gte: req.body.filters[key][0],
+          $lte: req.body.filters[key][1],
+        }
+      } else {
+        findArgs[key] = req.body.filters[key]
+      }
+    }
+  }
+  console.log('heer')
+  const products = await Product.find(findArgs)
+    .select('-image')
+    .populate('category')
+    .sort([[sortBy, order]])
+    .skip(skip)
+    .limit(limit)
+
+  if (products) {
+    res.json({ length: products.length, products })
+  } else {
+    res.status(404)
+    throw new Error('Products not found')
   }
 })
