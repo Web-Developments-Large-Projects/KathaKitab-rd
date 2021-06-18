@@ -109,20 +109,27 @@ export const getUserById = asyncHandler(async (req, res) => {
 //@route    GET /api/users/:id/profile
 //@access   Private
 export const getUserProfile = asyncHandler(async (req, res) => {
-  const user = await User.findById(req.params.id)
+  console.log('req.user._id', req.user._id)
+  console.log('req.params.id', req.params.id)
+  if (req.user._id == req.params.id) {
+    const user = await User.findById(req.params.id)
 
-  if (user) {
-    res.json({
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      about: user.about,
-      history: user.history,
-      createdAt: user.createdAt,
-    })
+    if (user) {
+      res.json({
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        about: user.about,
+        history: user.history,
+        createdAt: user.createdAt,
+      })
+    } else {
+      res.status(404)
+      throw new Error('User not found')
+    }
   } else {
-    res.status(404)
-    throw new Error('User not found')
+    res.status(401)
+    throw new Error('User not authorized')
   }
 })
 
@@ -130,34 +137,39 @@ export const getUserProfile = asyncHandler(async (req, res) => {
 //@route    PUT /api/users/:id
 //@access   Private
 export const updateUserProfile = asyncHandler(async (req, res) => {
-  const user = await User.findById(req.params.id)
+  if (req.user._id == req.params.id) {
+    const user = await User.findById(req.params.id)
 
-  if (user) {
-    user.name = req.body.name || user.name
-    user.email = req.body.email || user.email
-    user.about = req.body.about || user.about
-    if (req.body.password) {
-      user.password = req.body.password
-    }
+    if (user) {
+      user.name = req.body.name || user.name
+      user.email = req.body.email || user.email
+      user.about = req.body.about || user.about
+      if (req.body.password) {
+        user.password = req.body.password
+      }
 
-    const updatedUser = await user.save()
+      const updatedUser = await user.save()
 
-    if (updatedUser) {
-      res.json({
-        _id: updatedUser._id,
-        name: updatedUser.name,
-        email: updatedUser.email,
-        about: updatedUser.about,
-        role: updatedUser.role,
-        history: updatedUser.history,
-        createdAt: updatedUser.createdAt,
-      })
+      if (updatedUser) {
+        res.json({
+          _id: updatedUser._id,
+          name: updatedUser.name,
+          email: updatedUser.email,
+          about: updatedUser.about,
+          role: updatedUser.role,
+          history: updatedUser.history,
+          createdAt: updatedUser.createdAt,
+        })
+      } else {
+        res.status(400)
+        throw new Error('User not updated')
+      }
     } else {
-      res.status(400)
-      throw new Error('User not updated')
+      res.status(404)
+      throw new Error('User not found')
     }
   } else {
-    res.status(404)
-    throw new Error('User not found')
+    res.status(401)
+    throw new Error('User not authorized')
   }
 })
