@@ -1,6 +1,7 @@
 import express from 'express'
 import morgan from 'morgan'
 import bodycookieParser from 'body-parser'
+import cors from 'cors'
 import cookieParser from 'cookie-parser'
 import dotenv from 'dotenv'
 import colors from 'colors'
@@ -33,6 +34,7 @@ app.use(
 )
 app.use(cookieParser())
 app.use(expressValidator())
+// app.use(cors())
 
 //make sure the server API is running
 app.get('/', (req, res) => {
