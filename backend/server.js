@@ -24,7 +24,7 @@ const app = express()
 //database connection
 connectDB()
 
-//middlewares
+//middleware
 app.use(morgan('dev'))
 app.use(express.json())
 app.use(

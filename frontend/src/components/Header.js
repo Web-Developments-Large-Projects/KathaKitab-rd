@@ -1,5 +1,7 @@
 import React from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 import { Link, withRouter } from 'react-router-dom'
+import { logout } from '../actions/userActions'
 
 const isActive = (history, path) => {
   if (history.location.pathname === path) {
@@ -10,32 +12,89 @@ const isActive = (history, path) => {
 }
 
 const Header = ({ history }) => {
+  const dispatch = useDispatch()
+
+  const userLogin = useSelector((state) => state.userLogin)
+  const { loading, userInfo, error } = userLogin
+
+  const logoutHandler = (e) => {
+    e.preventDefault()
+    dispatch(logout())
+    history.push('/')
+  }
+
   return (
     <div>
-      <ul className='nav nav-tabs bg-primary'>
-        <li className='nav-item'>
-          <Link to='/' className='nav-link' style={isActive(history, '/')}>
-            Home
-          </Link>
-        </li>
-        <li className='nav-item'>
-          <Link
-            to='/login'
-            className='nav-link'
-            style={isActive(history, '/login')}
-          >
-            Log In
-          </Link>
-        </li>
+      <ul
+        className='nav nav-tabs bg-primary '
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}
+      >
         <li className='nav-item'>
           <Link
-            to='/register'
+            to='/'
             className='nav-link'
-            style={isActive(history, '/register')}
+            style={{
+              color: '#E3E7AF',
+              fontWeight: '600',
+            }}
           >
-            Register
+            Kathakitab
           </Link>
         </li>
+        <li>
+          <div className='nav-item'>
+            <Link to='/' className='nav-link' style={isActive(history, '/')}>
+              Home
+            </Link>
+          </div>
+        </li>
+        {userInfo ? (
+          <>
+            <li className='nav-item'>
+              <Link
+                to='/profile'
+                className='nav-link'
+                style={isActive(history, '/profile')}
+              >
+                Profile
+              </Link>
+            </li>
+            <li className='nav-item'>
+              <span
+                className='nav-link'
+                style={{ cursor: 'pointer', color: '#fff' }}
+                onClick={(e) => logoutHandler(e)}
+              >
+                Log Out
+              </span>
+            </li>
+          </>
+        ) : (
+          <>
+            <li className='nav-item'>
+              <Link
+                to='/login'
+                className='nav-link'
+                style={isActive(history, '/login')}
+              >
+                Log In
+              </Link>
+            </li>
+            <li className='nav-item'>
+              <Link
+                to='/register'
+                className='nav-link'
+                style={isActive(history, '/register')}
+              >
+                Register
+              </Link>
+            </li>
+          </>
+        )}
       </ul>
     </div>
   )

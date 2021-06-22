@@ -8,7 +8,7 @@ const LayoutContainer = ({
 }) => {
   return (
     <div>
-      <div className='jumbotron'>
+      <div className='jumbotron px-5'>
         <h2>{title}</h2>
         <p className='lead'>{description}</p>
       </div>
