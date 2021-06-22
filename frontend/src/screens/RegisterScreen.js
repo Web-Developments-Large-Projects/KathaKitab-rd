@@ -19,14 +19,14 @@ const RegisterScreen = ({ history, location }) => {
   const userRegister = useSelector((state) => state.userRegister)
   const { loading, error, userInfo } = userRegister
 
-  // const userLogin = useSelector((state) => state.userLogin)
-  // const { loading, error, userInfo } = userLogin
+  const userLogin = useSelector((state) => state.userLogin)
+  const { userInfo: userInfoLogin } = userLogin
 
   const redirect = location.search ? location.search.split('=')[1] : '/'
 
   useEffect(() => {
-    if (userInfo) history.push(redirect)
-  }, [userInfo, history, redirect])
+    if (userInfo || userInfoLogin) history.push(redirect)
+  }, [userInfo, history, redirect, userInfoLogin])
 
   const formChangeHandler = (eventName) => (event) => {
     setValues({ ...values, [eventName]: event.target.value })

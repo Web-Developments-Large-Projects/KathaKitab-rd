@@ -15,7 +15,7 @@ const Header = ({ history }) => {
   const dispatch = useDispatch()
 
   const userLogin = useSelector((state) => state.userLogin)
-  const { loading, userInfo, error } = userLogin
+  const { userInfo } = userLogin
 
   const logoutHandler = (e) => {
     e.preventDefault()
@@ -49,6 +49,28 @@ const Header = ({ history }) => {
           <div className='nav-item'>
             <Link to='/' className='nav-link' style={isActive(history, '/')}>
               Home
+            </Link>
+          </div>
+        </li>
+        <li>
+          <div className='nav-item'>
+            <Link
+              to={
+                userInfo && userInfo.role === 1
+                  ? '/admin/dashboard'
+                  : '/dashboard'
+              }
+              className='nav-link'
+              style={isActive(
+                history,
+                `${
+                  userInfo && userInfo.role === 1
+                    ? '/admin/dashboard'
+                    : '/dashboard'
+                }`
+              )}
+            >
+              Dashboard
             </Link>
           </div>
         </li>
@@ -95,6 +117,37 @@ const Header = ({ history }) => {
             </li>
           </>
         )}
+        {/* {userInfo && userInfo.role === 1 && (
+          <>
+            <li className='nav-item'>
+              <Link
+                to='/admin/products'
+                className='nav-link'
+                style={isActive(history, '/admin/products')}
+              >
+                Products
+              </Link>
+            </li>
+            <li className='nav-item'>
+              <Link
+                to='/admin/users'
+                className='nav-link'
+                style={isActive(history, '/admin/users')}
+              >
+                Users
+              </Link>
+            </li>
+            <li className='nav-item'>
+              <Link
+                to='/admin/orders'
+                className='nav-link'
+                style={isActive(history, '/admin/orders')}
+              >
+                Orders
+              </Link>
+            </li>
+          </>
+        )} */}
       </ul>
     </div>
   )

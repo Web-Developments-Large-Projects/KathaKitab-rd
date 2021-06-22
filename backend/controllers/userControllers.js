@@ -23,8 +23,6 @@ export const userRegister = asyncHandler(async (req, res) => {
       _id: user._id,
       name: user.name,
       email: user.email,
-      history: user.history,
-      about: user.about,
       role: user.role,
       token: generateToken(user._id),
     })
@@ -51,8 +49,6 @@ export const userLogin = asyncHandler(async (req, res) => {
       name: user.name,
       email: user.email,
       role: user.role,
-      history: user.history,
-      about: user.about,
       token: generateToken(user._id),
     })
   } else {
